@@ -54,7 +54,7 @@ class _MainScreenState extends State<MainScreen> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Homey',
+            label: 'Home',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.timeline),
