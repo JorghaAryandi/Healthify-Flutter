@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "266385184151",
+    "firebase_url": "https://healthify-2f05e-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "healthify-2f05e",
+    "storage_bucket": "healthify-2f05e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:266385184151:android:82b6b8d2ead96b8faee0d2",
+        "android_client_info": {
+          "package_name": "com.example.healthify_pab"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4wzC6NFxMhg5yxwxCejn-VaqoP5SeFS4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

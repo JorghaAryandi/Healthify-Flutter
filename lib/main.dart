@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart';
-import 'screens/tracker_screen.dart';
-import 'screens/measure_screen.dart';
-import 'screens/info_screen.dart';
-import 'screens/profile_screen.dart';
+import 'Auth/login.dart'; // Import the Login Screen
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async {
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+        apiKey: 'AIzaSyCsw6q3UuBIVuRIRopZg-hRzatNsmrDeMk',
+        authDomain: 'healthify-2f05e.firebaseapp.com',
+        databaseURL:
+            'https://healthify-2f05e-default-rtdb.asia-southeast1.firebasedatabase.app',
+        projectId: 'healthify-2f05e',
+        storageBucket: 'healthify-2f05e.firebasestorage.app',
+        messagingSenderId: '266385184151',
+        appId: '1:266385184151:web:77b340f3c5e7172aaee0d2'),
+  );
   runApp(const MyApp());
 }
 
@@ -16,63 +24,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const MainScreen(),
-    );
-  }
-}
-
-class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key}) : super(key: key);
-
-  @override
-  _MainScreenState createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
-
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    TrackerScreen(),
-    const MeasureScreen(),
-    const InfoScreen(),
-    const ProfileScreen(),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.timeline),
-            label: 'Tracker',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Measure',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.info),
-            label: 'Info',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+      home: LoginScreen(), // Set LoginScreen as the home screen
+      theme: ThemeData(
+        fontFamily: 'Poppins', // Set Poppins as the default font
       ),
     );
   }
