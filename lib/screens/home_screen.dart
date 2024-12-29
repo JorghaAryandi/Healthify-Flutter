@@ -118,15 +118,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 30),
                     // Measurement Data Card
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Color(0xffdeffda),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          Row(
+                    Material(
+                      elevation: 3, // Menambahkan elevation
+                      borderRadius: BorderRadius.circular(
+                          12), // Menyesuaikan border radius
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xffdeffda),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 Column(
@@ -140,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         color: Color(0xff1e4064),
                                       ),
                                     ),
-                                    SizedBox(height: 10),
+                                    const SizedBox(height: 10),
                                     const FaIcon(FontAwesomeIcons.heartPulse,
                                         size: 45, color: Color(0xff1e4064)),
                                     const SizedBox(height: 8),
@@ -173,217 +177,169 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ],
                                 ),
-                              ]),
-                          const SizedBox(height: 20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment
-                                .spaceAround, // Mengatur jarak rata
-                            children: [
-                              Column(
-                                children: [
-                                  const FaIcon(FontAwesomeIcons.lungs,
-                                      size: 45, color: Color(0xff1e4064)),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    "${latestHealthData["SpO2"] != null ? (latestHealthData["SpO2"] as num).toStringAsFixed(1) : "N/A"}  %",
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment
+                                  .spaceAround, // Mengatur jarak rata
+                              children: [
+                                Column(
+                                  children: [
+                                    const FaIcon(FontAwesomeIcons.lungs,
+                                        size: 45, color: Color(0xff1e4064)),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      "${latestHealthData["SpO2"] != null ? (latestHealthData["SpO2"] as num).toStringAsFixed(1) : "N/A"} %",
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  const Text(
-                                    "Blood Oxygen Saturation",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Color.fromARGB(255, 36, 36, 36),
+                                    const Text(
+                                      "Blood Oxygen Saturation",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Color.fromARGB(255, 36, 36, 36),
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                children: [
-                                  const FaIcon(FontAwesomeIcons.temperatureHigh,
-                                      size: 45, color: Color(0xff1e4064)),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    "${latestHealthData["Body Temp"] != null ? (latestHealthData["Body Temp"] as num).toStringAsFixed(1) : "N/A"} °C",
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    const FaIcon(
+                                        FontAwesomeIcons.temperatureHigh,
+                                        size: 45,
+                                        color: Color(0xff1e4064)),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      "${latestHealthData["Body Temp"] != null ? (latestHealthData["Body Temp"] as num).toStringAsFixed(1) : "N/A"} °C",
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  const Text(
-                                    "Body Temp",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Color.fromARGB(255, 36, 36, 36),
+                                    const Text(
+                                      "Body Temp",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Color.fromARGB(255, 36, 36, 36),
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          // const SizedBox(height: 20),
-                          // ElevatedButton(
-                          //   onPressed: () {
-                          //     // Logic untuk pengukuran baru
-                          //   },
-                          //   style: ElevatedButton.styleFrom(
-                          //     minimumSize: const Size(150, 50),
-                          //     backgroundColor: const Color(0xff1e4064),
-                          //   ),
-                          //   child: const Text(
-                          //     'Measure Now',
-                          //     style: TextStyle(
-                          //         color: Colors.white,
-                          //         fontWeight: FontWeight.bold),
-                          //   ),
-                          // ),
-                        ],
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    // _healthData(
-                    //   color: Colors.green.shade50,
-                    //   title: 'Health Data',
-                    //   data: [
-                    //     {
-                    //       "label": "Heart Rate",
-                    //       "value":
-                    //           "${latestHealthData["Heart Rate"]?.toStringAsFixed(1) ?? "N/A"} BPM",
-                    //       "icon": FontAwesomeIcons.heartPulse,
-                    //     },
-                    //     {
-                    //       "label": "Blood Oxygen Saturation",
-                    //       "value":
-                    //           "${latestHealthData["SpO2"]?.toStringAsFixed(1) ?? "N/A"} %",
-                    //       "icon": FontAwesomeIcons.lungs,
-                    //     },
-                    //     {
-                    //       "label": "Body Temp.",
-                    //       "value":
-                    //           "${latestHealthData["Body Temp"]?.toStringAsFixed(1) ?? "N/A"} °C",
-                    //       "icon": FontAwesomeIcons.temperatureHigh,
-                    //     },
-                    //   ],
-                    // ),
 
                     const SizedBox(height: 38),
 
                     // Room Data Card
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Column(
-                            children: [
-                              Column(
-                                children: [
-                                  Transform.translate(
-                                    offset: const Offset(
-                                        0.0, 30.0), // Dorong elemen keluar
-                                    child: Text(
-                                      "Room \nCondition",
-                                      style: TextStyle(
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xff1e4064),
+                    Material(
+                      elevation: 3, // Menambahkan elevation
+                      borderRadius: BorderRadius.circular(
+                          12), // Menyesuaikan border radius
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Column(
+                              children: [
+                                Column(
+                                  children: [
+                                    Transform.translate(
+                                      offset: const Offset(
+                                          0.0, 30.0), // Dorong elemen keluar
+                                      child: const Text(
+                                        "Room \nCondition",
+                                        style: TextStyle(
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xff1e4064),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              // const SizedBox(height: 20),
-                              Column(
-                                children: [
-                                  Transform.translate(
-                                    offset: const Offset(
-                                        0.0, 50.0), // Dorong elemen keluar
-                                    child: SvgPicture.asset(
-                                      'assets/svg/room.svg',
-                                      height: 180.0,
-                                      width: 180.0,
+                                  ],
+                                ),
+                                // const SizedBox(height: 20),
+                                Column(
+                                  children: [
+                                    Transform.translate(
+                                      offset: const Offset(
+                                          0.0, 50.0), // Dorong elemen keluar
+                                      child: SvgPicture.asset(
+                                        'assets/svg/room.svg',
+                                        height: 180.0,
+                                        width: 180.0,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          Column(
-                            // mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Column(
-                                children: [
-                                  const FaIcon(FontAwesomeIcons.house,
-                                      size: 45, color: Color(0xff1e4064)),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    "${latestHealthData["Room Temp"] != null ? (latestHealthData["Room Temp"] as num).toStringAsFixed(1) : "N/A"} °C",
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
+                                  ],
+                                ),
+                              ],
+                            ),
+                            Column(
+                              // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Column(
+                                  children: [
+                                    const FaIcon(FontAwesomeIcons.house,
+                                        size: 45, color: Color(0xff1e4064)),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      "${latestHealthData["Room Temp"] != null ? (latestHealthData["Room Temp"] as num).toStringAsFixed(1) : "N/A"} °C",
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  const Text(
-                                    "Room Temperature",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Color.fromARGB(255, 36, 36, 36),
+                                    const Text(
+                                      "Room Temperature",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Color.fromARGB(255, 36, 36, 36),
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Column(
-                                children: [
-                                  const FaIcon(FontAwesomeIcons.droplet,
-                                      size: 45, color: Color(0xff1e4064)),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    "${latestHealthData["Room Humi"] != null ? (latestHealthData["Room Humi"] as num).toStringAsFixed(1) : "N/A"} %",
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Column(
+                                  children: [
+                                    const FaIcon(FontAwesomeIcons.droplet,
+                                        size: 45, color: Color(0xff1e4064)),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      "${latestHealthData["Room Humi"] != null ? (latestHealthData["Room Humi"] as num).toStringAsFixed(1) : "N/A"} %",
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  const Text(
-                                    "Room Humidity",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Color.fromARGB(255, 36, 36, 36),
+                                    const Text(
+                                      "Room Humidity",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Color.fromARGB(255, 36, 36, 36),
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
+
                     const SizedBox(height: 38),
 
-                    // _roomData(
-                    //   color: Colors.blue.shade50,
-                    //   title: 'Room Data',
-                    //   data: [
-                    //     {
-                    //       "label": "Room Temperatue",
-                    //       "value":
-                    //           "${latestHealthData["Room Temp"]?.toStringAsFixed(1) ?? "N/A"} °C",
-                    //       "icon": FontAwesomeIcons.house,
-                    //     },
-                    //     {
-                    //       "label": "Room Humidity",
-                    //       "value":
-                    //           "${latestHealthData["Room Humi"]?.toStringAsFixed(1) ?? "N/A"} %",
-                    //       "icon": FontAwesomeIcons.droplet,
-                    //     },
-                    //   ],
-                    // ),
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.orange.shade50,
@@ -409,120 +365,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-    );
-  }
-
-  Widget _healthData({
-    required Color color,
-    required String title,
-    required List<Map> data,
-  }) {
-    return Material(
-      elevation: 4, // Add elevation here
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: data.map((item) {
-                return Column(
-                  children: [
-                    FaIcon(item["icon"] as IconData,
-                        size: 45, color: Colors.blue),
-                    const SizedBox(height: 8),
-                    Text(
-                      item["value"]!,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      item["label"]!,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color.fromARGB(255, 36, 36, 36),
-                      ),
-                    ),
-                  ],
-                );
-              }).toList(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _roomData({
-    required Color color,
-    required String title,
-    required List<Map> data,
-  }) {
-    return Material(
-      elevation: 4, // Add elevation here
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: data.map((item) {
-                return Column(
-                  children: [
-                    FaIcon(item["icon"] as IconData,
-                        size: 45, color: Colors.blue),
-                    const SizedBox(height: 8),
-                    Text(
-                      item["value"]!,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      item["label"]!,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color.fromARGB(255, 36, 36, 36),
-                      ),
-                    ),
-                  ],
-                );
-              }).toList(),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

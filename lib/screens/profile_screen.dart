@@ -192,12 +192,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         // Avatar
                         CircleAvatar(
-                          radius: 50,
-                          backgroundColor: Colors.grey.shade200,
-                          child: Image.asset(
-                            'assets/images/default-avatar.jpg',
-                            fit: BoxFit.cover,
-                          ),
+                          radius: 50, // Radius of the Circle
+                          backgroundColor: Colors
+                              .grey.shade200, // Background color of the circle
+                          backgroundImage: AssetImage(
+                              'assets/images/default-avatar.jpg'), // Directly use backgroundImage instead of child Image
                         ),
                         const SizedBox(width: 16),
                         // Detail Profil
@@ -217,7 +216,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              "Age ${ageController.text}",
+                              ageController.text,
                               style: const TextStyle(
                                   fontSize: 14, color: Colors.grey),
                             ),
@@ -225,6 +224,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ],
                     ),
+
                     const SizedBox(height: 30),
                     // Edit Profile Form
                     const Text(
@@ -342,9 +342,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onPressed: () {
                 FirebaseAuth.instance.signOut(); // Perform sign out
                 Navigator.of(context).pop(); // Close the dialog
-                Navigator.pushReplacement(
+                Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => LoginScreen()),
+                  (route) => false, // Remove all previous routes
                 );
               },
               child: const Text('Log Out'),

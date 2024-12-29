@@ -7,7 +7,6 @@ import 'history_screen.dart';
 import 'home_screen.dart';
 import 'measure_screen.dart';
 import 'info_screen.dart';
-import 'profile_screen.dart';
 import '../stores/user.dart';
 
 class MainScreen extends StatefulWidget {
@@ -54,9 +53,10 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: () {
                 FirebaseAuth.instance.signOut(); // Perform sign out
                 Navigator.of(context).pop(); // Close the dialog
-                Navigator.push(
+                Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => LoginScreen()),
+                  (route) => false, // Remove all previous routes
                 );
               },
               child: const Text('Log Out'),
@@ -179,14 +179,6 @@ class _MainScreenState extends State<MainScreen> {
         ),
       ),
       label: label,
-    );
-  }
-
-  // Helper function to enlarge icons when clicked
-  Widget _buildIcon(IconData icon) {
-    return Icon(
-      icon,
-      size: 30, // Default size
     );
   }
 }

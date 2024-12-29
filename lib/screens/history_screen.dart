@@ -436,6 +436,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ),
                       ),
                     ),
+                    const SizedBox(
+                        height:
+                            20), // Add this line to add space below the button
                   ],
                 ),
               ),

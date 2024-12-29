@@ -1,8 +1,21 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.0'
+        classpath 'com.google.gms:google-services:4.4.2' // Versi sesuai dengan plugin Firebase Anda
+    }
+}
+
 allprojects {
     repositories {
         google()
         mavenCentral()
     }
+    
 }
 
 rootProject.buildDir = "../build"
@@ -17,6 +30,5 @@ tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
 
-plugins {
-    id 'com.google.gms.google-services' version '4.4.1'
-}
+
+

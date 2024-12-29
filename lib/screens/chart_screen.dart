@@ -260,7 +260,8 @@ class _ChartScreenState extends State<ChartScreen> {
 
     final bars = [
       _createLineChartBarData(_createSpots('Room Temp'), Colors.blue),
-      _createLineChartBarData(_createSpots('Room Humi'), Colors.purple),
+      _createLineChartBarData(
+          _createSpots('Room Humi'), const Color.fromARGB(255, 67, 255, 167)),
     ];
 
     return Column(

@@ -135,8 +135,13 @@ class _AddDataScreenState extends State<AddDataScreen> {
                         prefixIcon: const Icon(Icons.calendar_today),
                         fillColor: const Color(0xffF1F0F5),
                         filled: true,
-                        border: OutlineInputBorder(
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.grey),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.blue),
                         ),
                       ),
                       validator: (value) {
@@ -160,8 +165,13 @@ class _AddDataScreenState extends State<AddDataScreen> {
                         prefixIcon: const Icon(FontAwesomeIcons.heart),
                         fillColor: const Color(0xffF1F0F5),
                         filled: true,
-                        border: OutlineInputBorder(
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.grey),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.blue),
                         ),
                       ),
                       keyboardType: TextInputType.number,
@@ -184,8 +194,13 @@ class _AddDataScreenState extends State<AddDataScreen> {
                         prefixIcon: const Icon(FontAwesomeIcons.lungs),
                         fillColor: const Color(0xffF1F0F5),
                         filled: true,
-                        border: OutlineInputBorder(
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.grey),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.blue),
                         ),
                       ),
                       keyboardType: TextInputType.number,
@@ -209,8 +224,13 @@ class _AddDataScreenState extends State<AddDataScreen> {
                             const Icon(FontAwesomeIcons.temperatureHigh),
                         fillColor: const Color(0xffF1F0F5),
                         filled: true,
-                        border: OutlineInputBorder(
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.grey),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.blue),
                         ),
                       ),
                       keyboardType: TextInputType.number,
@@ -233,8 +253,13 @@ class _AddDataScreenState extends State<AddDataScreen> {
                         prefixIcon: const Icon(FontAwesomeIcons.house),
                         fillColor: const Color(0xffF1F0F5),
                         filled: true,
-                        border: OutlineInputBorder(
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.grey),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.blue),
                         ),
                       ),
                       keyboardType: TextInputType.number,
@@ -257,8 +282,13 @@ class _AddDataScreenState extends State<AddDataScreen> {
                         prefixIcon: const Icon(FontAwesomeIcons.droplet),
                         fillColor: const Color(0xffF1F0F5),
                         filled: true,
-                        border: OutlineInputBorder(
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.grey),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.blue),
                         ),
                       ),
                       keyboardType: TextInputType.number,

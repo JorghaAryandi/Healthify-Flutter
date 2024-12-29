@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:healthify_pab/Auth/register.dart';
-// import '../screens/home_screen.dart';
 import '../screens/main_screen.dart';
 import '../stores/user.dart';
 
@@ -31,10 +30,16 @@ class _LoginScreenState extends State<LoginScreen> {
     return false;
   }
 
+  bool isLoading = false;
+
   Future<void> _login() async {
     if (!_validateInputs()) {
       return;
     }
+
+    setState(() {
+      isLoading = true;
+    });
 
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
@@ -74,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No user found with that email!')),
+          const SnackBar(content: Text('No user found with that email!')),
         );
       }
     } on FirebaseAuthException catch (e) {
@@ -85,10 +90,17 @@ class _LoginScreenState extends State<LoginScreen> {
         errorMessage = 'Wrong password provided.';
       }
 
+      setState(() {
+        isLoading = false;
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorMessage)),
       );
     } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
       );
@@ -185,15 +197,24 @@ class _LoginScreenState extends State<LoginScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        padding: const EdgeInsets.symmetric(vertical: 15),
                       ),
-                      child: const Text(
-                        'Login',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Color(0xFFE3DBDB),
-                        ),
-                      ),
+                      child: isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Login',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color(0xFFE3DBDB),
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 20),
