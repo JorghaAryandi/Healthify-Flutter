@@ -5,14 +5,9 @@ class InfoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Info"),
-        backgroundColor: Colors.blue,
-        centerTitle: true,
-      ),
+    return const Scaffold(
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -21,19 +16,19 @@ class InfoScreen extends StatelessWidget {
               content:
                   "Heart rate, atau detak jantung, adalah jumlah detak jantung per menit (bpm). Normalnya, heart rate orang dewasa berada di kisaran 60–100 bpm saat istirahat.",
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             InfoBlock(
               title: "Saturasi Oksigen (SpO2)",
               content:
                   "Saturasi oksigen menunjukkan persentase oksigen dalam darah Anda. Nilai normal biasanya berada di atas 95%. Jika kurang, itu bisa menjadi tanda hipoksemia.",
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             InfoBlock(
               title: "Suhu Tubuh Normal",
               content:
                   "Suhu tubuh normal manusia berkisar antara 36.5°C hingga 37.5°C. Jika suhu tubuh lebih dari 37.5°C, Anda mungkin mengalami demam.",
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             InfoBlock(
               title: "Suhu dan Kelembaban Ruangan",
               content:

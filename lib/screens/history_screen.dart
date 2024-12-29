@@ -27,6 +27,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
     fetchHistoryData();
   }
 
+  @override
+  void dispose() {
+    // Cancel any ongoing operations here
+    super.dispose();
+  }
+
   void initializeTable() {
     columns = [
       PlutoColumn(
@@ -155,138 +161,151 @@ class _HistoryScreenState extends State<HistoryScreen> {
     rows = [];
   }
 
-  void fetchHistoryData() async {
-    setState(() {
-      isLoading = true;
-    });
+  Future<void> fetchHistoryData() async {
+    if (!mounted) return;
 
     print("Fetching history data...");
 
-    final checksRef =
-        _dbRef.child('Checks').orderByChild('UID').equalTo(widget.userId);
-    final snapshot = await checksRef.get();
+    setState(() {
+      isLoading = true;
+      rows = []; // Clear existing data first
+    });
 
-    if (snapshot.exists) {
-      final data = Map<String, dynamic>.from(snapshot.value as Map);
+    try {
+      final checksRef =
+          _dbRef.child('Checks').orderByChild('UID').equalTo(widget.userId);
+      final snapshot = await checksRef.get();
 
-      // Debugging: Pastikan data yang diterima sesuai
-      // print("Fetched data: $data");
+      if (!mounted) return;
 
-      setState(() {
-        int no = 1; // Inisialisasi nomor urut
-        rows = data.entries.map((entry) {
-          final item = entry.value as Map;
+      if (snapshot.exists) {
+        final data = Map<String, dynamic>.from(snapshot.value as Map);
 
-          return PlutoRow(cells: {
-            'no': PlutoCell(value: no++), // Tambahkan nomor urut
-            'actions': PlutoCell(
-              value: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  // View Icon
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ViewDataScreen(
-                            data: {
-                              'key': entry.key, // Pass the key here
-                              'datetime': item['Datetime'] ?? 'N/A',
-                              'heart_rate': (item['Heart Rate'] ?? 0),
-                              'body_temp': (item['Body Temp'] ?? 0),
-                              'room_humi': (item['Room Humi'] ?? 0),
-                              'room_temp': (item['Room Temp'] ?? 0),
-                              'spo2': (item['SpO2'] ?? 0),
-                            },
+        setState(() {
+          int no = 1; // Inisialisasi nomor urut
+          rows = data.entries.map((entry) {
+            final item = entry.value as Map;
+
+            return PlutoRow(cells: {
+              'no': PlutoCell(value: no++), // Tambahkan nomor urut
+              'actions': PlutoCell(
+                value: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // View Icon
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ViewDataScreen(
+                              data: {
+                                'key': entry.key, // Pass the key here
+                                'datetime': item['Datetime'] ?? 'N/A',
+                                'heart_rate': (item['Heart Rate'] ?? 0),
+                                'body_temp': (item['Body Temp'] ?? 0),
+                                'room_humi': (item['Room Humi'] ?? 0),
+                                'room_temp': (item['Room Temp'] ?? 0),
+                                'spo2': (item['SpO2'] ?? 0),
+                              },
+                            ),
                           ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        child: const Icon(Icons.visibility, color: Colors.blue),
                       ),
-                      child: const Icon(Icons.visibility, color: Colors.blue),
                     ),
-                  ),
-                  // Edit Icon
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditDataScreen(
-                            data: {
-                              'key': entry.key, // Pass the key here
-                              'datetime': item['Datetime'] ?? 'N/A',
-                              'heart_rate': (item['Heart Rate'] ?? 0),
-                              'body_temp': (item['Body Temp'] ?? 0),
-                              'room_humi': (item['Room Humi'] ?? 0),
-                              'room_temp': (item['Room Temp'] ?? 0),
-                              'spo2': (item['SpO2'] ?? 0),
-                            },
-                            // Tambahkan callback onUpdateSuccess
-                            onUpdateSuccess: () {
-                              fetchHistoryData();
-                            },
+                    // Edit Icon
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditDataScreen(
+                              data: {
+                                'key': entry.key, // Pass the key here
+                                'datetime': item['Datetime'] ?? 'N/A',
+                                'heart_rate': (item['Heart Rate'] ?? 0),
+                                'body_temp': (item['Body Temp'] ?? 0),
+                                'room_humi': (item['Room Humi'] ?? 0),
+                                'room_temp': (item['Room Temp'] ?? 0),
+                                'spo2': (item['SpO2'] ?? 0),
+                              },
+                              // Tambahkan callback onUpdateSuccess
+                              onUpdateSuccess: () async {
+                                fetchHistoryData();
+                              },
+                            ),
                           ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        child: const Icon(Icons.edit, color: Colors.orange),
                       ),
-                      child: const Icon(Icons.edit, color: Colors.orange),
                     ),
-                  ),
-                  // Delete Icon
-                  GestureDetector(
-                    onTap: () {
-                      deleteHistoryItem(entry.key); // Pass the key here
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
+                    // Delete Icon
+                    GestureDetector(
+                      onTap: () {
+                        deleteHistoryItem(entry.key); // Pass the key here
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.delete, color: Colors.red),
                       ),
-                      child: const Icon(Icons.delete, color: Colors.red),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            'key': PlutoCell(
-                value: entry.key), // Display the key in a separate column
-            'datetime': PlutoCell(value: item['Datetime'] ?? 'N/A'),
-            'heart_rate': PlutoCell(value: (item['Heart Rate'] ?? 0)),
-            'body_temp': PlutoCell(value: (item['Body Temp'] ?? 0)),
-            'room_humi': PlutoCell(value: (item['Room Humi'] ?? 0)),
-            'room_temp': PlutoCell(value: (item['Room Temp'] ?? 0)),
-            'spo2': PlutoCell(value: (item['SpO2'] ?? 0)),
-          });
-        }).toList();
+              'key': PlutoCell(
+                  value: entry.key), // Display the key in a separate column
+              'datetime': PlutoCell(value: item['Datetime'] ?? 'N/A'),
+              'heart_rate': PlutoCell(value: (item['Heart Rate'] ?? 0)),
+              'body_temp': PlutoCell(value: (item['Body Temp'] ?? 0)),
+              'room_humi': PlutoCell(value: (item['Room Humi'] ?? 0)),
+              'room_temp': PlutoCell(value: (item['Room Temp'] ?? 0)),
+              'spo2': PlutoCell(value: (item['SpO2'] ?? 0)),
+            });
+          }).toList();
 
-        // print("Rows updated: $rows");
+          // print("Rows updated: $rows");
 
-        isLoading = false;
-      });
-    } else {
-      setState(() {
-        rows = [];
-        isLoading = false;
-      });
-      // print("No data found.");
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          rows = [];
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to fetch data: $e')),
+        );
+      }
     }
   }
 
   void deleteHistoryItem(String key) async {
+    if (!mounted) return;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -305,11 +324,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     if (confirmed ?? false) {
       try {
+        // Set loading state only if still mounted
+        if (mounted) {
+          setState(() {
+            isLoading = true;
+          });
+        }
+
         await _dbRef.child('Checks/$key').remove();
-        fetchHistoryData();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Item deleted successfully!')),
-        );
+        await fetchHistoryData();
+        if (mounted) {
+          await fetchHistoryData();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Item deleted successfully!')),
+          );
+        }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to delete item: $e')),
@@ -383,8 +412,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) =>
-                                  AddDataScreen(userId: widget.userId)),
+                              builder: (context) => AddDataScreen(
+                                    userId: widget.userId,
+                                    onAddSuccess: () async {
+                                      fetchHistoryData(); // Pastikan menunggu data terbaru
+                                    },
+                                  )),
                         );
                       },
                       style: ElevatedButton.styleFrom(

@@ -67,6 +67,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // Save user data to Firebase
   void saveUserData() async {
     try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("User not authenticated.")),
+        );
+        return;
+      }
+
+      // Update Firebase Auth profile (display name and email)
+      await user.updateDisplayName(nameController.text);
+      await user.updateEmail(emailController.text);
+
+      // If password is also being updated
+      final newPassword = passwordController.text;
+      if (newPassword.isNotEmpty) {
+        await user.updatePassword(newPassword);
+      }
+
+      // Save additional data to Realtime Database
       final userRef = _dbRef.child('Users/${widget.userId}');
       await userRef.update({
         'name': nameController.text,
@@ -77,6 +97,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Profile updated successfully!")),
+      );
+    } on FirebaseAuthException catch (authError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Auth Error: ${authError.message}")),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -171,7 +195,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           radius: 50,
                           backgroundColor: Colors.grey.shade200,
                           child: Image.asset(
-                            'assets/images/default_avatar.png',
+                            'assets/images/default-avatar.jpg',
                             fit: BoxFit.cover,
                           ),
                         ),

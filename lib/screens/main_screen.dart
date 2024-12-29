@@ -29,7 +29,7 @@ class _MainScreenState extends State<MainScreen> {
     _screens = [
       HomeScreen(userId: widget.userData.userUID),
       HistoryScreen(userId: widget.userData.userUID),
-      const MeasureScreen(),
+      MeasureScreen(userData: widget.userData),
       ChartScreen(userId: widget.userData.userUID),
       const InfoScreen(),
     ];
@@ -149,7 +149,7 @@ class _MainScreenState extends State<MainScreen> {
           },
           type: BottomNavigationBarType.fixed,
           items: [
-            _buildNavItem(Icons.home, 'Homey', 0),
+            _buildNavItem(Icons.home, 'Home', 0),
             _buildNavItem(Icons.timeline, 'Tracker', 1),
             _buildNavItem(
                 Icons.touch_app, 'Measure', 2), // Ganti dengan ikon tangan

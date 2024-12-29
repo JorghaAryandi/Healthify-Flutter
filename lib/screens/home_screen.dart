@@ -38,20 +38,20 @@ class _HomeScreenState extends State<HomeScreen> {
         // Konversi nilai sesuai tipe data
         setState(() {
           latestHealthData = {
-            // "Datetime": data[latestKey]["Datetime"] ?? "N/A",
-            // "UID": data[latestKey]["UID"] ?? "N/A",
-            // "Heart Rate": (data[latestKey]["Heart Rate"] ?? 0).toDouble(),
-            // "Body Temp": (data[latestKey]["Body Temp"] ?? 0).toDouble(),
-            // "Room Humi": (data[latestKey]["Room Humi"] ?? 0).toDouble(),
-            // "Room Temp": (data[latestKey]["Room Temp"] ?? 0).toDouble(),
-            // "SpO2": (data[latestKey]["SpO2"] ?? 0).toDouble(),
-            "Datetime": "29-03-2004 19:00:00",
-            "UID": "12345",
-            "Heart Rate": 75.0,
-            "Body Temp": 36.6,
-            "Room Humi": 45.0,
-            "Room Temp": 22.0,
-            "SpO2": 98.0,
+            "Datetime": data[latestKey]["Datetime"] ?? "N/A",
+            "UID": data[latestKey]["UID"] ?? "N/A",
+            "Heart Rate": (data[latestKey]["Heart Rate"] ?? 0).toDouble(),
+            "Body Temp": (data[latestKey]["Body Temp"] ?? 0).toDouble(),
+            "Room Humi": (data[latestKey]["Room Humi"] ?? 0).toDouble(),
+            "Room Temp": (data[latestKey]["Room Temp"] ?? 0).toDouble(),
+            "SpO2": (data[latestKey]["SpO2"] ?? 0).toDouble(),
+            // "Datetime": "29-03-2004 19:00:00",
+            // "UID": "12345",
+            // "Heart Rate": 75.0,
+            // "Body Temp": 36.6,
+            // "Room Humi": 45.0,
+            // "Room Temp": 22.0,
+            // "SpO2": 98.0,
           };
         });
       } else {
@@ -223,22 +223,22 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
-                          ElevatedButton(
-                            onPressed: () {
-                              // Logic untuk pengukuran baru
-                            },
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: const Size(150, 50),
-                              backgroundColor: const Color(0xff1e4064),
-                            ),
-                            child: const Text(
-                              'Measure Now',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
+                          // const SizedBox(height: 20),
+                          // ElevatedButton(
+                          //   onPressed: () {
+                          //     // Logic untuk pengukuran baru
+                          //   },
+                          //   style: ElevatedButton.styleFrom(
+                          //     minimumSize: const Size(150, 50),
+                          //     backgroundColor: const Color(0xff1e4064),
+                          //   ),
+                          //   child: const Text(
+                          //     'Measure Now',
+                          //     style: TextStyle(
+                          //         color: Colors.white,
+                          //         fontWeight: FontWeight.bold),
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),

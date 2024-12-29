@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 
 class ChartScreen extends StatefulWidget {
   final String userId;
-
   const ChartScreen({super.key, required this.userId});
 
   @override
@@ -14,10 +13,11 @@ class ChartScreen extends StatefulWidget {
 
 class _ChartScreenState extends State<ChartScreen> {
   final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
-
   bool isLoading = true;
-
   List<Map<String, dynamic>> data = [];
+
+  // Cache for timestamps to improve performance
+  late List<double> _timestamps;
 
   @override
   void initState() {
@@ -26,137 +26,263 @@ class _ChartScreenState extends State<ChartScreen> {
   }
 
   void fetchHistoryData() async {
-    print("userId: ${widget.userId}");
-    final checksRef =
-        _dbRef.child('Checks').orderByChild('UID').equalTo(widget.userId);
-    final snapshot = await checksRef.get();
+    if (!mounted) return;
 
-    if (snapshot.exists) {
-      final rawData = Map<String, dynamic>.from(snapshot.value as Map);
+    setState(() {
+      isLoading = true;
+    });
 
-      setState(() {
-        data = rawData.entries.map((entry) {
+    try {
+      final checksRef =
+          _dbRef.child('Checks').orderByChild('UID').equalTo(widget.userId);
+      final snapshot = await checksRef.get();
+
+      if (!mounted) return;
+
+      if (snapshot.exists) {
+        final rawData = Map<String, dynamic>.from(snapshot.value as Map);
+        final newData = rawData.entries.map((entry) {
           final item = Map<String, dynamic>.from(entry.value);
-          // Ensure Datetime is a string in the format 'yyyy-MM-dd HH:mm:ss'
-          item['Datetime'] =
-              entry.value['Datetime'] as String; // Store as String
+          item['Datetime'] = entry.value['Datetime'] as String;
           return item;
         }).toList();
 
-        // Sort data by 'Datetime' in ascending order
-        data.sort((a, b) {
+        // Sort data by datetime
+        newData.sort((a, b) {
           final dateA = DateTime.parse(a['Datetime']);
           final dateB = DateTime.parse(b['Datetime']);
-          return dateA.compareTo(dateB); // Ascending order
+          return dateA.compareTo(dateB);
         });
 
-        isLoading = false;
-      });
-    } else {
-      setState(() {
-        data = [];
-        isLoading = false;
-      });
+        // Initialize cached values
+        _timestamps = newData
+            .map((item) => DateTime.parse(item['Datetime'])
+                .millisecondsSinceEpoch
+                .toDouble())
+            .toList();
+
+        setState(() {
+          data = newData;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          data = [];
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          data = [];
+          isLoading = false;
+        });
+      }
+      print('Error fetching data: $e');
     }
   }
 
-  List<LineChartBarData> _buildChartData1(List<Map<String, dynamic>> data) {
-    List<FlSpot> heartRateSpots = [];
-    List<FlSpot> spo2Spots = [];
-    List<FlSpot> bodyTempSpots = [];
+  List<FlSpot> _createSpots(String field) {
+    if (data.isEmpty) return [];
 
-    for (int i = 0; i < data.length; i++) {
-      final timestamp =
-          DateTime.parse(data[i]['Datetime']).millisecondsSinceEpoch.toDouble();
+    return List.generate(data.length, (i) {
+      final value = data[i][field]?.toDouble() ?? 0;
+      return FlSpot(_timestamps[i], value);
+    });
+  }
 
-      // Printing values before adding to FlSpot lists
-      String formattedTime = formatDatetime(timestamp.toInt());
+  LineChartBarData _createLineChartBarData(List<FlSpot> spots, Color color) {
+    return LineChartBarData(
+      spots: spots,
+      isCurved: true,
+      color: color,
+      barWidth: 3,
+      isStrokeCapRound: true,
+      dotData: FlDotData(
+        show: true,
+        getDotPainter: (spot, percent, barData, index) {
+          return FlDotCirclePainter(
+            radius: 4,
+            color: color,
+            strokeWidth: 1,
+            strokeColor: Colors.white,
+          );
+        },
+      ),
+      belowBarData: BarAreaData(show: false),
+    );
+  }
 
-      print('Formatted Time: $formattedTime');
-      print('Heart Rate: ${data[i]['Heart Rate']?.toDouble() ?? 0}');
-      print('SpO2: ${data[i]['SpO2']?.toDouble() ?? 0}');
-      print('Body Temp: ${data[i]['Body Temp']?.toDouble() ?? 0}');
+  String _getBottomTitle(double value) {
+    try {
+      final DateTime date = DateTime.fromMillisecondsSinceEpoch(value.toInt());
+      return DateFormat('HH:mm\ndd/MM').format(date); // Format lebih ringkas
+    } catch (e) {
+      return '';
+    }
+  }
 
-      // Add FlSpot values to the respective lists
-      heartRateSpots
-          .add(FlSpot(timestamp, data[i]['Heart Rate']?.toDouble() ?? 0));
-      spo2Spots.add(FlSpot(timestamp, data[i]['SpO2']?.toDouble() ?? 0));
-      bodyTempSpots
-          .add(FlSpot(timestamp, data[i]['Body Temp']?.toDouble() ?? 0));
+  LineChartData _createChartData(List<LineChartBarData> bars) {
+    // Buat list timestamps dari data spots
+    final List<double> timestamps = bars
+        .expand((barData) => barData.spots.map((spot) => spot.x))
+        .toSet()
+        .toList()
+      ..sort(); // Urutkan timestamp
+
+    // Normalisasi timestamps menggunakan index berbasis jumlah data
+    final List<double> normalizedIndexes = List.generate(
+      timestamps.length,
+      (index) => index.toDouble() / (timestamps.length - 1), // Rentang [0, 1]
+    );
+
+    final double intervalX =
+        1.0 / (timestamps.length - 1); // Interval tetap untuk sebaran
+
+    return LineChartData(
+      gridData: FlGridData(
+        show: true,
+        drawVerticalLine: true,
+        horizontalInterval: 20,
+        verticalInterval: intervalX,
+      ),
+      titlesData: FlTitlesData(
+        leftTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            reservedSize: 40,
+            interval: 20,
+            getTitlesWidget: (value, meta) => Text(
+              value.toInt().toString(),
+              style: const TextStyle(fontSize: 10),
+            ),
+          ),
+        ),
+        rightTitles: const AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        topTitles: const AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            reservedSize: 50,
+            interval: intervalX,
+            getTitlesWidget: (value, meta) {
+              int index = (value * (timestamps.length - 1)).round();
+              if (index >= 0 && index < timestamps.length) {
+                final String title = _getBottomTitle(timestamps[index]);
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    title,
+                    style: const TextStyle(fontSize: 9),
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      ),
+      lineBarsData: bars.map((barData) {
+        // Peta ulang spots berdasarkan index normalisasi
+        final List<FlSpot> adjustedSpots = barData.spots.map((spot) {
+          int originalIndex = timestamps.indexOf(spot.x);
+          final normalizedX = normalizedIndexes[originalIndex];
+          return FlSpot(normalizedX, spot.y);
+        }).toList();
+        return barData.copyWith(spots: adjustedSpots);
+      }).toList(),
+      lineTouchData: const LineTouchData(
+        enabled: true,
+      ),
+    );
+  }
+
+  Widget _buildLegendItem(String label, Color color) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 16.0),
+      child: Row(
+        children: [
+          Container(
+            width: 20,
+            height: 20,
+            color: color,
+          ),
+          const SizedBox(width: 8),
+          Text(label),
+        ],
+      ),
+    );
+  }
+
+  Widget buildHealthChart() {
+    if (data.isEmpty) {
+      return const Center(child: Text('No health data available'));
     }
 
-    return [
-      LineChartBarData(
-        spots: heartRateSpots,
-        isCurved: true,
-        color: Colors.blueAccent,
-        barWidth: 4,
-        isStrokeCapRound: true,
-        belowBarData: BarAreaData(show: false),
-      ),
-      LineChartBarData(
-        spots: spo2Spots,
-        isCurved: true,
-        color: Colors.greenAccent,
-        barWidth: 4,
-        isStrokeCapRound: true,
-        belowBarData: BarAreaData(show: false),
-      ),
-      LineChartBarData(
-        spots: bodyTempSpots,
-        isCurved: true,
-        color: Colors.orangeAccent,
-        barWidth: 4,
-        isStrokeCapRound: true,
-        belowBarData: BarAreaData(show: false),
-      ),
+    final bars = [
+      _createLineChartBarData(_createSpots('Heart Rate'), Colors.blue),
+      _createLineChartBarData(_createSpots('SpO2'), Colors.green),
+      _createLineChartBarData(_createSpots('Body Temp'), Colors.orange),
     ];
+
+    return Column(
+      children: [
+        // Wrap the chart with SizedBox to limit its height
+        SizedBox(
+          height: 300, // Fix the height of the chart
+          child: LineChart(_createChartData(bars)),
+        ),
+        const SizedBox(height: 10), // Space between chart and legend
+        // Wrap the legend in a SingleChildScrollView to handle overflow
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              _buildLegendItem('Heart Rate', Colors.blue),
+              _buildLegendItem('SpO2', Colors.green),
+              _buildLegendItem('Body Temp', Colors.orange),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
-  List<LineChartBarData> _buildChartData2(List<Map<String, dynamic>> data) {
-    List<FlSpot> roomTempSpots = [];
-    List<FlSpot> roomHumiSpots = [];
-
-    for (int i = 0; i < data.length; i++) {
-      final timestamp =
-          DateTime.parse(data[i]['Datetime']).millisecondsSinceEpoch.toDouble();
-
-      // Printing values before adding to FlSpot lists
-      String formattedTime = formatDatetime(timestamp.toInt());
-      print('Formatted Time: $formattedTime');
-      print('Room Temp: ${data[i]['Room Temp']?.toDouble() ?? 0}');
-      print('Room Humi: ${data[i]['Room Humi']?.toDouble() ?? 0}');
-
-      roomTempSpots
-          .add(FlSpot(timestamp, data[i]['Room Temp']?.toDouble() ?? 0));
-      roomHumiSpots
-          .add(FlSpot(timestamp, data[i]['Room Humi']?.toDouble() ?? 0));
+  Widget buildRoomChart() {
+    if (data.isEmpty) {
+      return const Center(child: Text('No room data available'));
     }
 
-    return [
-      LineChartBarData(
-        spots: roomTempSpots,
-        isCurved: true,
-        color: Colors.blue,
-        barWidth: 4,
-        isStrokeCapRound: true,
-        belowBarData: BarAreaData(show: false),
-      ),
-      LineChartBarData(
-        spots: roomHumiSpots,
-        isCurved: true,
-        color: Colors.purpleAccent,
-        barWidth: 4,
-        isStrokeCapRound: true,
-        belowBarData: BarAreaData(show: false),
-      ),
+    final bars = [
+      _createLineChartBarData(_createSpots('Room Temp'), Colors.blue),
+      _createLineChartBarData(_createSpots('Room Humi'), Colors.purple),
     ];
-  }
 
-  String formatDatetime(int timestamp) {
-    final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    return DateFormat('yyyy-MM-dd HH:mm')
-        .format(date); // Format as 'YYYY-MM-DD HH:mm'
+    return Column(
+      children: [
+        // Wrap the chart with SizedBox to limit its height
+        SizedBox(
+          height: 300, // Fix the height of the chart
+          child: LineChart(_createChartData(bars)),
+        ),
+        const SizedBox(height: 10), // Space between chart and legend
+        // Wrap the legend in a SingleChildScrollView to handle overflow
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              _buildLegendItem('Room Temp', Colors.blue),
+              _buildLegendItem('Room Humi', Colors.purple),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -166,15 +292,27 @@ class _ChartScreenState extends State<ChartScreen> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (isLoading)
                 const Center(child: CircularProgressIndicator())
+              else if (data.isEmpty)
+                const Center(
+                  child: Text(
+                    'No Data Available',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                  ),
+                )
               else ...[
-                // Card for Chart 1: Heart Rate, SpO2, and Body Temperature
+                // Health Data Card
                 Card(
                   elevation: 4,
                   shadowColor: Colors.black26,
+                  color:
+                      const Color(0xffdeffda), // Warna untuk Health Data Card
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
@@ -186,82 +324,24 @@ class _ChartScreenState extends State<ChartScreen> {
                               fontSize: 20, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 16),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.4,
-                          child: LineChart(LineChartData(
-                            gridData:
-                                const FlGridData(show: false), // Hilangkan grid
-                            titlesData: FlTitlesData(
-                              leftTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  reservedSize: 40, // Beri ruang untuk label Y
-                                  interval:
-                                      10, // Sesuaikan interval Y dengan data
-                                  getTitlesWidget: (value, meta) {
-                                    return Text(
-                                      value
-                                          .toInt()
-                                          .toString(), // Menampilkan nilai sebagai integer
-                                      style: const TextStyle(fontSize: 10),
-                                      textAlign: TextAlign.center,
-                                    );
-                                  },
-                                ),
-                              ),
-                              rightTitles: const AxisTitles(
-                                sideTitles: SideTitles(
-                                    showTitles: false), // Hilangkan di kanan
-                              ),
-                              topTitles: const AxisTitles(
-                                sideTitles: SideTitles(
-                                    showTitles: false), // Hilangkan di atas
-                              ),
-                              // Inside your chart setup
-                              bottomTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true, // Show labels on the X-axis
-                                  reservedSize:
-                                      60, // Ensure there's enough space for the labels
-                                  getTitlesWidget: (value, meta) {
-                                    final timestamp = value
-                                        .toInt(); // Convert timestamp to int
-                                    String formattedTime = formatDatetime(
-                                        timestamp); // Format the timestamp
-
-                                    return Transform.translate(
-                                      offset: Offset(0,
-                                          10), // Adjust the label position vertically
-                                      child: Transform.rotate(
-                                        angle:
-                                            -0.5, // Rotate the label to make it readable
-                                        child: Text(
-                                          formattedTime, // Display the formatted datetime
-                                          style: TextStyle(fontSize: 10),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                            borderData: FlBorderData(
-                              show: false, // Hilangkan border
-                            ),
-                            lineBarsData:
-                                _buildChartData1(data), // Data untuk grafik 1
-                          )),
+                        // Wrap health chart in ConstrainedBox to prevent layout overflow
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            maxHeight:
+                                350, // Set a max height to avoid overflow
+                          ),
+                          child: buildHealthChart(),
                         ),
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // Card for Chart 2: Room Temperature and Room Humidity
+                // Room Data Card
                 Card(
                   elevation: 4,
                   shadowColor: Colors.black26,
+                  color: Colors.blue.shade50, // Warna untuk Room Data Card
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
@@ -273,70 +353,13 @@ class _ChartScreenState extends State<ChartScreen> {
                               fontSize: 20, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 16),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.3,
-                          child: LineChart(LineChartData(
-                            gridData:
-                                const FlGridData(show: false), // Hilangkan grid
-                            titlesData: FlTitlesData(
-                              leftTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  reservedSize: 40, // Beri ruang untuk label Y
-                                  interval:
-                                      10, // Sesuaikan interval Y dengan data
-                                  getTitlesWidget: (value, meta) {
-                                    return Text(
-                                      value
-                                          .toInt()
-                                          .toString(), // Menampilkan nilai sebagai integer
-                                      style: const TextStyle(fontSize: 10),
-                                      textAlign: TextAlign.center,
-                                    );
-                                  },
-                                ),
-                              ),
-                              rightTitles: const AxisTitles(
-                                sideTitles: SideTitles(
-                                    showTitles: false), // Hilangkan di kanan
-                              ),
-                              topTitles: const AxisTitles(
-                                sideTitles: SideTitles(
-                                    showTitles: false), // Hilangkan di atas
-                              ),
-                              bottomTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true, // Show labels on the X-axis
-                                  reservedSize:
-                                      60, // Ensure there's enough space for the labels
-                                  getTitlesWidget: (value, meta) {
-                                    final timestamp = value
-                                        .toInt(); // Convert timestamp to int
-                                    String formattedTime = formatDatetime(
-                                        timestamp); // Format the timestamp
-
-                                    return Transform.translate(
-                                      offset: Offset(0,
-                                          10), // Adjust the label position vertically
-                                      child: Transform.rotate(
-                                        angle:
-                                            -0.5, // Rotate the label to make it readable
-                                        child: Text(
-                                          formattedTime, // Display the formatted datetime
-                                          style: TextStyle(fontSize: 10),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                            borderData: FlBorderData(
-                              show: false, // Hilangkan border
-                            ),
-                            lineBarsData:
-                                _buildChartData2(data), // Data untuk grafik 2
-                          )),
+                        // Wrap room chart in ConstrainedBox to prevent layout overflow
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            maxHeight:
+                                350, // Set a max height to avoid overflow
+                          ),
+                          child: buildRoomChart(),
                         ),
                       ],
                     ),

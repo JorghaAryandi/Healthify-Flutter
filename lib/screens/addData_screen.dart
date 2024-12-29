@@ -3,70 +3,89 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:intl/intl.dart';
 
 class AddDataScreen extends StatefulWidget {
-  final String userId;
+  final String userId; // UID pengguna untuk fetch data dari Firebase
+  final Function onAddSuccess;
 
-  const AddDataScreen({super.key, required this.userId});
+  const AddDataScreen(
+      {super.key, required this.userId, required this.onAddSuccess});
 
   @override
   _AddDataScreenState createState() => _AddDataScreenState();
 }
 
 class _AddDataScreenState extends State<AddDataScreen> {
-  final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
   final _formKey = GlobalKey<FormState>();
+  late TextEditingController datetimeController;
+  late TextEditingController heartRateController;
+  late TextEditingController bodyTempController;
+  late TextEditingController roomHumiController;
+  late TextEditingController roomTempController;
+  late TextEditingController spo2Controller;
 
-  final TextEditingController bodyTempController = TextEditingController();
-  final TextEditingController heartRateController = TextEditingController();
-  final TextEditingController roomHumiController = TextEditingController();
-  final TextEditingController roomTempController = TextEditingController();
-  final TextEditingController spo2Controller = TextEditingController();
+  final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
 
-  final GlobalKey<FormBuilderState> _fbKey = GlobalKey<FormBuilderState>();
+  @override
+  void initState() {
+    super.initState();
+    // Initialize controllers
+    datetimeController = TextEditingController();
+    heartRateController = TextEditingController();
+    bodyTempController = TextEditingController();
+    roomHumiController = TextEditingController();
+    roomTempController = TextEditingController();
+    spo2Controller = TextEditingController();
+  }
 
-  void _submitData() async {
-    if (_formKey.currentState!.validate() &&
-        _fbKey.currentState!.saveAndValidate()) {
-      final String datetime =
-          _fbKey.currentState!.fields['datetime']!.value.toString();
-      final double bodyTemp = double.parse(bodyTempController.text);
-      final double heartRate = double.parse(heartRateController.text);
-      final double roomHumi = double.parse(roomHumiController.text);
-      final double roomTemp = double.parse(roomTempController.text);
-      final double spo2 = double.parse(spo2Controller.text);
+  void _addData() async {
+    if (_formKey.currentState!.validate()) {
+      // Format the selected DateTime using DateFormat
+      String formattedDatetime = '';
+      if (datetimeController.text.isNotEmpty) {
+        DateTime selectedDatetime = DateTime.parse(datetimeController.text);
+        formattedDatetime =
+            DateFormat('yyyy-MM-dd HH:mm:ss').format(selectedDatetime);
+      } else {
+        // Fallback to current datetime if no date is selected
+        formattedDatetime =
+            DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+      }
 
-      // Creating data to be stored in Firebase
-      final Map<String, dynamic> data = {
-        'Datetime': datetime,
-        'Body Temp': bodyTemp,
-        'Heart Rate': heartRate,
-        'Room Humi': roomHumi,
-        'Room Temp': roomTemp,
-        'SpO2': spo2,
+      // Parse the input fields to ensure no null values are passed
+      double parseToDouble(String? text) {
+        return text != null && text.isNotEmpty
+            ? double.tryParse(text) ?? 0.0
+            : 0.0;
+      }
+
+      final newData = {
+        'Datetime': formattedDatetime,
+        'Heart Rate': parseToDouble(heartRateController.text),
+        'Body Temp': parseToDouble(bodyTempController.text),
+        'Room Humi': parseToDouble(roomHumiController.text),
+        'Room Temp': parseToDouble(roomTempController.text),
+        'SpO2': parseToDouble(spo2Controller.text),
         'UID': widget.userId,
       };
 
       try {
-        // Push data to Firebase under Checks node
-        await _dbRef.child('Checks').push().set(data);
+        // Add the new data to Firebase
+        await _dbRef.child('Checks').push().set(newData);
+
+        // Call the onAddSuccess callback to refresh the data on the previous screen
+        widget.onAddSuccess();
+
+        // Navigate back to the previous screen
+        Navigator.pop(context);
 
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Data added successfully!')),
         );
-
-        // Navigate back to the previous screen
-        Navigator.pop(context);
-
-        // Clear input fields
-        bodyTempController.clear();
-        heartRateController.clear();
-        roomHumiController.clear();
-        roomTempController.clear();
-        spo2Controller.clear();
       } catch (e) {
-        // Show error message if data fails to be added
+        // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content: Text('Failed to add data. Please try again.')),
@@ -100,7 +119,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Add Data',
+                      'Add New Data',
                       style: TextStyle(
                         fontSize: 20,
                         color: Colors.teal,
@@ -127,6 +146,10 @@ class _AddDataScreenState extends State<AddDataScreen> {
                         return null;
                       },
                       inputType: InputType.both,
+                      onChanged: (value) {
+                        datetimeController.text =
+                            value != null ? value.toString() : '';
+                      },
                     ),
                     const SizedBox(height: 16),
                     // Heart Rate Field
@@ -134,7 +157,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
                       controller: heartRateController,
                       decoration: InputDecoration(
                         labelText: 'Heart Rate (bpm)',
-                        prefixIcon: const Icon(FontAwesomeIcons.heartPulse),
+                        prefixIcon: const Icon(FontAwesomeIcons.heart),
                         fillColor: const Color(0xffF1F0F5),
                         filled: true,
                         border: OutlineInputBorder(
@@ -176,9 +199,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
                         return null;
                       },
                     ),
-
                     const SizedBox(height: 16),
-
                     // Body Temperature Field
                     TextFormField(
                       controller: bodyTempController,
@@ -203,7 +224,6 @@ class _AddDataScreenState extends State<AddDataScreen> {
                         return null;
                       },
                     ),
-
                     const SizedBox(height: 16),
                     // Room Temperature Field
                     TextFormField(
@@ -256,7 +276,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
                     // Submit Button
                     Center(
                       child: ElevatedButton(
-                        onPressed: _submitData,
+                        onPressed: _addData,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue.shade50,
                           shape: RoundedRectangleBorder(

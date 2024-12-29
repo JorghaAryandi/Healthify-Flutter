@@ -3,7 +3,7 @@ import 'Auth/login.dart'; // Import the Login Screen
 import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  // WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: const FirebaseOptions(
         apiKey: 'AIzaSyCsw6q3UuBIVuRIRopZg-hRzatNsmrDeMk',

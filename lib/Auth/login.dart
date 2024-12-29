@@ -33,7 +33,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     if (!_validateInputs()) {
-      // If validation fails, stop login process
       return;
     }
 
