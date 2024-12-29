@@ -3,6 +3,7 @@ import 'Auth/login.dart'; // Import the Login Screen
 import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: const FirebaseOptions(
         apiKey: 'AIzaSyCsw6q3UuBIVuRIRopZg-hRzatNsmrDeMk',
@@ -14,6 +15,7 @@ void main() async {
         messagingSenderId: '266385184151',
         appId: '1:266385184151:web:77b340f3c5e7172aaee0d2'),
   );
+
   runApp(const MyApp());
 }
 

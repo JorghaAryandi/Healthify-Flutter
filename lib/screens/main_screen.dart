@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:healthify_pab/screens/profile_screen.dart';
 import '../Auth/login.dart';
 import 'chart_screen.dart';
 import 'history_screen.dart';
 import 'home_screen.dart';
 import 'measure_screen.dart';
 import 'info_screen.dart';
+import 'profile_screen.dart';
 import '../stores/user.dart';
 
 class MainScreen extends StatefulWidget {
@@ -27,8 +29,8 @@ class _MainScreenState extends State<MainScreen> {
     _screens = [
       HomeScreen(userId: widget.userData.userUID),
       HistoryScreen(userId: widget.userData.userUID),
-      ChartScreen(userId: widget.userData.userUID),
       const MeasureScreen(),
+      ChartScreen(userId: widget.userData.userUID),
       const InfoScreen(),
     ];
   }
@@ -69,18 +71,62 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: Image.asset('assets/images/healthify_logo.png',
-            width: 40, height: 40), // Left logo
+        leading: Image.asset(
+          'assets/images/healthify_logo.png',
+          width: 40,
+          height: 40,
+        ), // Left logo
         title: const Text(
           'Healthify',
-          style: TextStyle(fontWeight: FontWeight.bold), // Bold title
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black, // Title color
+          ),
         ),
-        backgroundColor: Colors.transparent, // Transparent AppBar
+        backgroundColor: Colors.white, // AppBar color
         elevation: 0, // Remove shadow
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _showLogoutDialog, // Show logout confirmation
+          PopupMenuButton<String>(
+            icon: const Icon(
+              Icons.account_circle, // Profile icon
+              color: Colors.black,
+            ),
+            onSelected: (value) {
+              if (value == 'profile') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProfileScreen(
+                      userId: widget.userData.userUID,
+                    ),
+                  ),
+                ); // Navigate to profile
+              } else if (value == 'logout') {
+                _showLogoutDialog(); // Show logout confirmation
+              }
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              const PopupMenuItem<String>(
+                value: 'profile',
+                child: Row(
+                  children: [
+                    Icon(Icons.person, color: Colors.black),
+                    SizedBox(width: 10),
+                    Text('Profile'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout, color: Colors.black),
+                    SizedBox(width: 10),
+                    Text('Logout'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -103,29 +149,36 @@ class _MainScreenState extends State<MainScreen> {
           },
           type: BottomNavigationBarType.fixed,
           items: [
-            BottomNavigationBarItem(
-              icon: _buildIcon(Icons.dashboard),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: _buildIcon(Icons.history),
-              label: 'History',
-            ),
-            BottomNavigationBarItem(
-              icon: _buildIcon(Icons.timeline),
-              label: 'Chart',
-            ),
-            BottomNavigationBarItem(
-              icon: _buildIcon(Icons.favorite),
-              label: 'Measure',
-            ),
-            BottomNavigationBarItem(
-              icon: _buildIcon(Icons.info),
-              label: 'Info',
-            ),
+            _buildNavItem(Icons.home, 'Homey', 0),
+            _buildNavItem(Icons.timeline, 'Tracker', 1),
+            _buildNavItem(
+                Icons.touch_app, 'Measure', 2), // Ganti dengan ikon tangan
+            _buildNavItem(Icons.timeline, 'Chart', 3),
+            _buildNavItem(Icons.info, 'Info', 4),
           ],
         ),
       ),
+    );
+  }
+
+  BottomNavigationBarItem _buildNavItem(
+      IconData icon, String label, int index) {
+    return BottomNavigationBarItem(
+      icon: Container(
+        decoration: _currentIndex == index
+            ? BoxDecoration(
+                color: Color(0xff1e4064), // Warna latar aktif
+                borderRadius: BorderRadius.circular(10),
+              )
+            : null,
+        padding: const EdgeInsets.all(8.0),
+        child: Icon(
+          icon,
+          size: 24,
+          color: _currentIndex == index ? Colors.white : Colors.grey,
+        ),
+      ),
+      label: label,
     );
   }
 
